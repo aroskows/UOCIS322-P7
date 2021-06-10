@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+    brevetsapp:
+        build: brevetsapp/brevets/
+        command: python -u flask_brevets.py
+        #command: sleep infinity
+        ports:
+            - "5973:5000"
+        depends_on:
+            - ourdb
+        environment:
+            MONGODB_HOSTNAME: ourdb
+
+    restapi:
+        build: api/
+        command: python -u api.py
+        #command: sleep infinity
+        ports:
+            - "5974:5000"
+        depends_on:
+            - ourdb
+        environment:
+            MONGODB_HOSTNAME: ourdb
+
+    website:
+        build: website/
+        command: python -u website.py
+        #command: sleep infinity
+        ports:
+            - "5975:5000"
+        depends_on:
+            - restapi
+
+    ourdb:
+        image: mongo:latest

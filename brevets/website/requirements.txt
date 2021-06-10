@@ -1,0 +1,7 @@
+flask
+pymongo
+requests
+flask_login
+flask_wtf
+passlib
+jsonpickle
