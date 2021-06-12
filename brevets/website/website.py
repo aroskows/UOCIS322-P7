@@ -10,6 +10,7 @@ import requests
 import flask
 import json
 import jsonpickle
+import base64
 
 
 app = Flask(__name__)
@@ -108,12 +109,14 @@ def register():
         username = form.username.data
         password = form.password.data
         token = myhash(password)
+        encode_token = base64.urlsafe_b64encode(token.encode("ascii"))
         app.logger.debug(username)
         
         app.logger.debug(token)
+        app.logger.debug(encode_token)
         user = load_user(username)
         # see if  user is in database
-        r = requests.get("http://restapi:5000/RegisterUser/" + username + "/" +  token)
+        r = requests.get("http://restapi:5000/register/" + username + "/" +  str(encode_token))
         app.logger.debug(r)
         if r == False:
             abort(400)
@@ -137,9 +140,9 @@ def login():
         app.logger.debug(username)
         app.logger.debug(password)
         app.logger.debug(token)
-       
-        newuser = User(username, token, id_)
-        app.logger.debug(session)
+        encode_token = base64.urlsafe_b64encode(token.encode("ascii"))
+        #newuser = User(username, token, id_)
+        #app.logger.debug(session)
         '''try:
             app.logger.debug("EXISTS")
             session['user'][str(newuser.id)] = jsonpickle.encode(newuser)

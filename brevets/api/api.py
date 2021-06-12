@@ -3,6 +3,7 @@ from flask import Flask, request
 from flask_restful import Resource, Api
 from pymongo import MongoClient
 import json
+import base64
 
 
 app = Flask(__name__)
@@ -132,41 +133,86 @@ class listClose(Resource):
                     }
             return json.dumps(result)
 
-class RegisterUser(Resource):
+class register(Resource):
     def get(self, username, hashed): 
-        app.logger.debug("MADE IT")
-        app.logger.debug(username)
+        
+        '''app.logger.debug("MADE IT")
+        app.logger.debug(type(username))
+       # hashed = hashed[1:]
+        #hashed = hashed[:-1]
         app.logger.debug(hashed)
+        
+       # hashed = str(base64.urlsafe_b64decode(hashed.encode("ascii")))
+        app.logger.debug(type(hashed))
         mydata = list(db.tododb.find())
-        user = [username, hashed]
-        app.logger.debug(user)
+        #user = [username, hashed]
+        user = ["hi"]
+        app.logger.debug(type(user))
         app.logger.debug(mydata)
+        
+        mydict = { '1' : ["hi"]}
+
+        app.logger.debug(json.dumps(mydict))
+
 
         for item  in mydata:
             app.logger.debug(item)
             if item == user:
-                return False
+                return json.dumps("ALREADY IN")
         user_id = len(mydata) + 1
         app.logger.debug(user_id)
-        item_doc = { 
-            str(user_id): user
-            }
+        #item_doc = { str(user_i): u }
+        item_doc = mydict
         app.logger.debug(item_doc)
         db.tododb.insert_one(item_doc)
-        return item_doc
+        app.logger.debug("AFTER")
+        app.logger.debug(type(item_doc))
+        var = json.dumps(item_doc)
+        app.logger.debug(var)
+        app.logger.debug(item_doc)
+        return json.dumps(item_doc)'''
+        
+        mydata = list(db.tododb.find())
+        user_id = len(mydata) + 1 
+        app.logger.debug(hashed) 
+        for i in mydata:
+            app.logger.debug(i)
+            for k in i:
+                if k == '_id':
+                    pass
+                else:
+                    app.logger.debug(i[k])
+                    if username == i[k][0]:
+                        return json.dumps("FOUND")
+        user_id = str(user_id)
+        item_doc = {
+                user_id : [username, hashed]
+                }
+        item = {
+                user_id : [username, hashed]
+                }
+        
+        db.tododb.insert_one(item)
+        return json.dumps(item_doc)
 
-class getUser(Resource):
+class token(Resource):
+    '''this needs to return the token '''
     def get(self, user_id, username, hashed):
         mydata = list(db.tododb.find())
        
-        #for item in mydata:
-        app.logger.debug("GETTING")
-        if str(user_id) in mydata:
-            app.logger.debug("IN THERE")
-            return mydata[user_id]
-        else:
-            flask.abort(400)
-        app.logger.debug(mydata[str(user_id)])
+        for i in mydata:
+            app.logger.debug(i)
+            for k in i:
+                if k == '_id':
+                    pass
+                else:
+                    app.logger.debug(i[k])
+                    if username == i[k][0] and hashed == i[k][1]:
+                        return json.dumps("FOUND")
+
+        return json.dumps("NOT FOUND")
+     
+
                 
 
 
@@ -180,8 +226,8 @@ class getUser(Resource):
 api.add_resource(listAll, '/listAll/<dtype>/<topk>')
 api.add_resource(listOpen, '/listOpen/<dtype>/<topk>')
 api.add_resource(listClose, '/listClose/<dtype>/<topk>')
-api.add_resource(RegisterUser, '/RegisterUser/<username>/<hashed>')
-api.add_resource(getUser, '/getUser/<user_id>/<username>/<hashed>')
+api.add_resource(register, '/register/<username>/<hashed>')
+api.add_resource(token, '/token/<user_id>/<username>/<hashed>')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
